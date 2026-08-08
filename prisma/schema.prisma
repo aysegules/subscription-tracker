@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas = ["subscription"]
+}
+
+model User{
+  id Int @default(autoincrement()) @id
+  name String
+  email String @unique
+  password String  
+  createdAt DateTime @default(now())
+
+  subscription Subscription?
+  @@schema("subscription")
+
+}
+
+model Subscription{
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  name String
+  price Float 
+  currency String @default("USD")
+  frequency Frequency @default(WEEKLY)
+  category String
+  paymentMethod String
+  status Status @default(ACTIVE)
+  startDate DateTime
+  renewalDate DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@schema("subscription")
+}
+
+enum Frequency{
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+
+  @@schema("subscription")
+}
+
+enum Status{
+  ACTIVE
+  CANCELLED
+  EXPIRED
+
+  @@schema("subscription")
+
+}
