@@ -60,15 +60,14 @@ typings/
 # next.js build output
 .next
 
-
+#prisma 
 .agents
 .claude
 .windsurf
 generated
-
 prisma/migrations
 
-
+#packages
 skills-lock.json
 package-lock.json
 
