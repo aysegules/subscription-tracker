@@ -1,13 +1,18 @@
 import { Router } from "express";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import {
+  createSubscription,
+  getUserSubscriptions,
+} from "../controllers/subscription.controller.js";
 
-const subscriptionRouter = Router();
+const router = Router();
 
-subscriptionRouter.get("/", () => {});
-subscriptionRouter.get("/:id", () => {});
-subscriptionRouter.post("/:id", () => {});
-subscriptionRouter.put("/:id", () => {});
-subscriptionRouter.delete("/:id", () => {});
-subscriptionRouter.get("/user/:id", () => {});
-subscriptionRouter.put("/:id/cancel", () => {});
-subscriptionRouter.get("/upcoming-renewals", () => {});
-export default subscriptionRouter;
+router.get("/", () => {});
+router.get("/:id", () => {}); //get details
+router.post("/", authMiddleware, createSubscription);
+router.put("/:id", () => {}); //update
+router.delete("/:id", () => {}); //delete
+router.get("/:id", authMiddleware, getUserSubscriptions); //get user subs
+router.put("/:id/cancel", () => {}); //cancel subs
+router.get("/upcoming-renewals", () => {}); //get upcoming
+export default router;
