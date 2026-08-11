@@ -6,6 +6,10 @@ import { connectDB, disconnectDB } from "../lib/prisma.ts";
 import authRouter from "./routes/auth.routes.js";
 import userRouter from "./routes/user.routes.js";
 import subscriptionRouter from "./routes/subscription.routes.js";
+import workflowRouter from "./routes/workflow.routes.js";
+
+import { errorHandler, notFound } from "./middlewares/error.middleware.js";
+import { arcjetMiddleware } from "./middlewares/arcjet.middleware.js";
 
 config();
 
@@ -16,20 +20,26 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// app.use(arcjetMiddleware);
+
 const VERSION = process.env.VERSION || "/api/v1";
 
 app.use(`${VERSION}/auth`, authRouter);
 app.use(`${VERSION}/users`, userRouter);
 app.use(`${VERSION}/subscriptions`, subscriptionRouter);
+app.use(`${VERSION}/workflows`, workflowRouter);
 
-app.get("/", (req, res) => {
+app.get(`${VERSION}`, (req, res) => {
   res.status(200).json({ message: "Welcome to the Subscription Tracker API!" });
 });
 
 const PORT = process.env.PORT || 5500;
 
+app.use(notFound);
+app.use(errorHandler);
+
 const server = app.listen(PORT, async () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}${VERSION}`);
 
   await connectDB();
 });
