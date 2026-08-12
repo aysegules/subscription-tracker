@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 
 const renewalPeriods = {
   DAILY: 1,
@@ -13,38 +13,36 @@ const subscriptionSchema = z
     price: z.number().min(0),
     currency: z.string(),
     frequency: z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]),
-    category: z.string(),
+    category: z.string().trim().min(1),
     paymentMethod: z.string().trim(),
     status: z.enum(["ACTIVE", "CANCELLED", "EXPIRED"]),
-    startDate: z.date().refine((value) => value <= new Date(), {
+    startDate: z.coerce.date().refine((value) => value <= new Date(), {
       error: "Start date must be in the past",
     }),
-    renewalDate: z
-      .coerce()
-      .date()
-      .refine(
-        function (value) {
-          value > this.startDate();
-        },
-        {
-          error: "Renewal date must be after the start date",
-        },
-      ),
+    renewalDate: z.coerce.date().optional(),
   })
   .transform((data) => {
     if (!data.renewalDate) {
-      const daysToAdd = renewalPeriods(data.frequency) || 0;
+      const daysToAdd = renewalPeriods[data.frequency] || 0;
       const computedDate = new Date(data.startDate);
       computedDate.setDate(computedDate.getDate() + daysToAdd);
-
       data.renewalDate = computedDate;
     }
 
-    if (this.renewalDate < new Date()) {
-      this.status = "EXPIRED";
+    if (data.renewalDate < new Date()) {
+      data.status = "EXPIRED";
     }
 
     return data;
+  })
+  .superRefine((data, ctx) => {
+    if (data.renewalDate && data.renewalDate <= data.startDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Renewal date must be after the start date",
+        path: ["renewalDate"],
+      });
+    }
   });
 
 export { subscriptionSchema };
