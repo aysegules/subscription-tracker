@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma.ts";
+import { workflowClient } from "../config/upstash.js";
 
 const createSubscription = async (req, res, next) => {
   try {
@@ -9,10 +10,22 @@ const createSubscription = async (req, res, next) => {
       },
     });
 
+    const { workflowRunId } = await workflowClient.trigger({
+      url: `${process.env.SERVER_URL}${process.env.VERSION}/workflows/subscription/reminder`,
+      body: {
+        subscriptionId: subscription.id,
+      },
+      headers: {
+        "content-type": "application/json",
+      },
+      retries: 0,
+    });
+
     res.status(201).json({
       status: "success",
       data: {
         subscription,
+        workflowRunId,
       },
     });
   } catch (error) {
@@ -22,7 +35,7 @@ const createSubscription = async (req, res, next) => {
 
 const getUserSubscriptions = async (req, res, next) => {
   try {
-    if (req.user.id !== req.params.id) {
+    if (req.user.id !== parseInt(req.params.id)) {
       const error = new Error("Access denied");
       error.statusCode = 403;
       return next(error);
