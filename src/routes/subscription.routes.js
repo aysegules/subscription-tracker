@@ -1,18 +1,20 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { validateRequest } from "../middlewares/validate.middleware.js";
 import {
   createSubscription,
   getUserSubscriptions,
 } from "../controllers/subscription.controller.js";
+import { subscriptionSchema } from "../validators/subscriptionValidator.js";
 
 const router = Router();
 
-router.get("/", () => {});
-router.get("/:id", () => {}); //get details
-router.post("/", authMiddleware, createSubscription);
-router.put("/:id", () => {}); //update
-router.delete("/:id", () => {}); //delete
-router.get("/:id", authMiddleware, getUserSubscriptions); //get user subs
-router.put("/:id/cancel", () => {}); //cancel subs
-router.get("/upcoming-renewals", () => {}); //get upcoming
+router.get("/:id", authMiddleware, getUserSubscriptions);
+router.post(
+  "/",
+  validateRequest(subscriptionSchema),
+  authMiddleware,
+  createSubscription,
+);
+
 export default router;
