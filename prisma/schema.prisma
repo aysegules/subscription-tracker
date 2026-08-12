@@ -31,7 +31,7 @@ model Subscription{
   paymentMethod String
   status Status @default(ACTIVE)
   startDate DateTime
-  renewalDate DateTime
+  renewalDate DateTime?
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
