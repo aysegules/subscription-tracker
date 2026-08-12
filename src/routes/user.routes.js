@@ -1,7 +1,10 @@
 import { Router } from "express";
-import { getUsers } from "../controllers/user.controller.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { getUsers, getUser } from "../controllers/user.controller.js";
 
-const userRouter = Router();
+const router = Router();
 
-userRouter.get("/", getUsers);
-export default userRouter;
+router.get("/", getUsers);
+router.get("/:id", authMiddleware, getUser);
+
+export default router;
