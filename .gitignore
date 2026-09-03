@@ -67,7 +67,4 @@ typings/
 generated
 prisma/migrations
 
-#packages
-skills-lock.json
-package-lock.json
 
